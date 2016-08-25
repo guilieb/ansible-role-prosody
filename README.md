@@ -4,20 +4,20 @@ Prosody
 Install and configure Prosody XMPP server.
 
 Features:
-  0 Install Prosody from distribution repository.
-  1 In option, install EPEL repository on CentOS systems.
-  2 Install all XMPP extensions supported by [Conversations](https://conversations.im/) XMPP client.
-  3 Allow define main settings:
-      - Admins
-      - Use libevent
-      - Modules
-      - Registration
-      - SSL
-      - c2s and s2s behavior
-      - Log files destination
-	  - Etc 
-  4 For each domains to be managed by Prosody, this role allow to push one config files to systems targeted.
-    Each config file define all settings for his own domain. See an exemple in 'files/exemple.com.cfg.lua'.
+- 0 Install Prosody from distribution repository.
+- 1 In option, install EPEL repository on CentOS systems.
+- 2 Install all XMPP extensions supported by [Conversations](https://conversations.im/) XMPP client.
+- 3 Allow define main settings:
+    - Admins
+    - Use libevent
+    - Modules
+    - Registration
+    - SSL
+    - c2s and s2s behavior
+    - Log files destination
+    - Etc 
+- 4 For each domains to be managed by Prosody, this role allow to push one config files to systems targeted.
+  Each config file define all settings for his own domain. See an exemple in 'files/exemple.com.cfg.lua'.
 
 
 Requirements
