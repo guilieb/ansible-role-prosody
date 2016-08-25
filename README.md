@@ -198,11 +198,11 @@ Example Playbook
 ----------------
 
 ```yaml
-- hosts: servers
+- hosts: xmpp-servers
   become: true
   vars:
     - prosody_c2s_require_encryption: true
-    - prosody_s2s_secure_auth
+    - prosody_s2s_secure_auth: true
 	- prosody_domains: [ "mydomain.org", "myclub.org" ]
   roles:
     - prosody
