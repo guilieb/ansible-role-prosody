@@ -1,0 +1,6 @@
+---
+# Main vars file for prosody
+
+# Community modules repos
+prosody_community_modules_repo: "https://hg.prosody.im/prosody-modules/"
+prosody_community_modules_directory: "/usr/share/lib/prosody/modules/community/"

@@ -1,0 +1,86 @@
+---
+# Main defaults file for prosody
+
+# Installation options 
+prosody_install_epel: true
+prosody_install_community_modules: true 
+prosody_install_lua_zlib: false 
+prosody_install_lua_event: false
+prosody_install_lua_ldap: true
+prosody_stop_at_the_end: false
+
+# Main options 
+prosody_enable_conversations_XEPs: true
+prosody_modules_conversations:
+  - "carbons"
+  - "smacks"
+  - "blocking"
+  - "csi"
+  - "mam"
+prosody_modules_auth_ldap: ["auth_ldap"]
+prosody_modules_auth_pam: ["auth_pam"]
+prosody_admins: []
+prosody_use_libevent: false
+prosody_allow_registration: false
+prosody_modules_enabled: []
+prosody_modules_enable_default: true
+prosody_modules_default:
+  - "roster"
+  - "saslauth" 
+  - "tls" 
+  - "dialback" 
+  - "disco" 
+  - "private" 
+  - "vcard" 
+  - "version" 
+  - "uptime" 
+  - "time" 
+  - "ping" 
+  - "pep" 
+  - "register" 
+  - "admin_adhoc" 
+  - "posix"
+prosody_modules_disabled: []
+  
+# SSL/TLS options 
+prosody_ssl_key: "certs/localhost.key" 
+prosody_ssl_cert: "certs/localhost.cert"
+
+# Network options
+prosody_c2s_ports: []
+prosody_c2s_interfaces: []
+prosody_c2s_timeout: null
+prosody_s2s_ports: []
+prosody_s2s_interfaces: []
+prosody_s2s_timeout: Null
+
+# Internal main auth opitons
+prosody_authentication: "internal_plain"
+prosody_ldap_base: ""
+prosody_ldap_server: "localhost"
+prosody_ldap_rootdn: ""
+prosody_ldap_password: ""
+prosody_ldap_filter: "(uid=$user)"
+prosody_ldap_scope: "subtree"
+prosody_ldap_tls: false
+prosody_ldap_mode: "bind"
+prosody_ldap_admins: ""
+
+# Storage option
+prosody_data_path: "/var/lib/prosody"
+prosody_storage: "sqlite"
+
+# c2s and s2s behavior options
+prosody_c2s_require_encryption: true
+prosody_s2s_secure_auth: false
+prosody_s2s_insecure_allowed_domains: [ "gmail.com" ]
+prosody_s2s_secure_required_domains: [ "jabber.org" ]
+
+
+# Log files options
+prosody_log_info_level: "info"
+prosody_log_info_destination: "/var/log/prosody/prosody.log"
+prosody_log_error_destination: "/var/log/prosody/prosody.err"
+
+# Domains managed by Prosody options 
+prosody_domains: []

@@ -1,0 +1,57 @@
+---
+# Main tasks file for prosody role
+
+# Install prosody
+- include: install.{{ ansible_os_family }}.yml
+
+# Install community modules
+- include: install.community-modules.yml
+  when: prosody_install_community_modules
+
+# Enable default modules
+- name: Add default modules, if needed, inside enabled modules list
+  set_fact:
+    prosody_modules_enabled: "{{ prosody_modules_default + prosody_modules_enabled }}"
+  when: prosody_modules_enable_default
+  
+# Enable conversation XEPs
+- name: Add modules, for Conversations client XEPs, inside enabled modules list
+  set_fact:
+    prosody_modules_enabled: "{{ prosody_modules_enabled + prosody_modules_conversations }}"
+  when: prosody_enable_conversations_XEPs
+
+# Enable LDAP Prosody module
+- name: Add module "ldap", if needed, inside enabled modules list
+  set_fact:
+    prosody_modules_enabled: "{{ prosody_modules_enabled + prosody_modules_auth_ldap }}"
+  when: prosody_authentication == "ldap"
+
+# Enable PAM Prosody module
+- name: Add module "pam", if needed, inside enabled modules list
+  set_fact:
+    prosody_modules_enabled: "{{ prosody_modules_enabled + prosody_modules_auth_pam }}"
+  when: prosody_authentication == "pam"
+  
+# Push configuration files
+- name: Copy main config file
+  template:
+    src: templates/prosody.cfg.lua.j2
+    dest: /etc/prosody/prosody.cfg.lua
+    owner: root
+    group: prosody
+    mode: 0640 # u:rw, g:r and o:-
+    backup: yes
+    
+  notify: restart prosody
+
+- name: Copy domains (hosts) config files
+  copy:
+    src: "files/{{ item }}.cfg.lua"
+    dest: "/etc/prosody/conf.d/{{ item }}.cfg.lua"
+    owner: root
+    group: prosody
+    mode: 0640 # u:rw, g:r and o:-
+    backup: yes
+    validate: 'luac -p %s'
+  with_items: "{{prosody_domains}}"
+  notify: restart prosody
