@@ -1,5 +1,5 @@
-Prosody
-=======
+Prosody role for Ansible
+========================
 
 Install and configure Prosody XMPP server.
 
