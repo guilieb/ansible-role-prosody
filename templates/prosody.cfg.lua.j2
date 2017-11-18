@@ -31,7 +31,7 @@ admins = {  }
 -- For more information see: http://prosody.im/doc/libevent
 use_libevent = {{ "true" if prosody_use_libevent else "false" }};
 
-{% if prosody_install_community_modules %}
+{% if prosody_install_community_modules and ansible_os_family == 'RedHat' %}
 -- Additional modules
 plugin_paths = { "{{ prosody_community_modules_directory }}" }
 {% endif %}
