@@ -3,38 +3,38 @@
 - name: Install Prosody
   apt:
     name: prosody
-    state: present
+    state: latest
   
 - name: Install Mercurial (For Prosody community modules)
   apt:
     name: prosody-modules
-    state: present
+    state: latest
   when: prosody_install_community_modules
 
 - name: Install lua-event (If needed)
   apt:
     name: lua-event
-    state: present
+    state: latest
   when: prosody_install_lua_event
   notify: restart prosody
 
 - name: Install lua-zlib (If needed)
   apt:
     name: lua-zlib
-    state: present
+    state: latest
   when: prosody_install_lua_zlib
   notify: restart prosody
 
 - name: Install lua-ldap (If needed)
   apt:
     name: lua-ldap
-    state: present
+    state: latest
   when: prosody_install_lua_ldap
   notify: restart prosody
 
 - name: Install Sqlite support in Lua. Needed for Conversation XMPP Client (MAM module).
   apt:
     name: lua-dbi-sqlite3
-    state: present
+    state: latest
   when: prosody_enable_conversations_XEPs or prosody_storage == "sqlite"
   notify: restart prosody

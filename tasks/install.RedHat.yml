@@ -3,18 +3,18 @@
 - name: Install EPEL (If specified and needed)
   yum:
     name: epel-release
-    state: present
+    state: latest
   when: prosody_install_epel and ansible_distribution == 'CentOS'
   
 - name: Install Prosody
   yum:
     name: prosody
-    state: present
+    state: latest
   
 - name: Install Mercurial (For Prosody community modules)
   yum:
     name: mercurial
-    state: present
+    state: latest
   when: prosody_install_community_modules
 
 - name: Install Prosody community modules
@@ -28,27 +28,27 @@
 - name: Install lua-event (If needed)
   yum:
     name: lua-event
-    state: present
+    state: latest
   when: prosody_install_lua_event
   notify: restart prosody
   
 - name: Install lua-zlib (If needed)
   yum:
     name: lua-zlib
-    state: present
+    state: latest
   when: prosody_install_lua_zlib
   notify: restart prosody
 
 - name: Install lua-ldap (If needed)
   yum:
     name: lua-ldap
-    state: present
+    state: latest
   when: prosody_install_lua_ldap
   notify: restart prosody
 
 - name: Install Sqlite support in Lua. Needed for Conversation XMPP Client (MAM module).
   yum:
     name: lua-dbi
-    state: present
+    state: latest
   when: prosody_enable_conversations_XEPs or prosody_storage == "sqlite"
   notify: restart prosody
