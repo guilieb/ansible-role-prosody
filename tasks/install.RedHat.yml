@@ -1,9 +1,5 @@
 ---
 # tasks file for install Prosody on Fedora, CentOS and Red-Hat systems
-- name: Make sure Ansible can run
-  raw: dnf install -y python2 libselinux-python
-  when: ansible_distribution == 'Fedora'
-  
 - name: Install EPEL (If specified and needed)
   yum: name=epel-release state=present
   when: prosody_install_epel and ansible_distribution == 'CentOS'
