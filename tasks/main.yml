@@ -2,7 +2,7 @@
 # Main tasks file for prosody role
 
 # Install prosody
-- include: install.{{ ansible_os_family }}.yml
+- include_tasks: install.{{ ansible_os_family }}.yml
 
 # Enable default modules
 - name: Add default modules, if needed, inside enabled modules list
