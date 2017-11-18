@@ -4,10 +4,6 @@
 # Install prosody
 - include: install.{{ ansible_os_family }}.yml
 
-# Install community modules
-- include: install.community-modules.yml
-  when: prosody_install_community_modules
-
 # Enable default modules
 - name: Add default modules, if needed, inside enabled modules list
   set_fact:

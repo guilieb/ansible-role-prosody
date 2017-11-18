@@ -1,5 +1,0 @@
----
-# tasks file for install Prosody community modules
-- name: Install Prosody community modules
-  hg: repo={{ prosody_community_modules_repo }} dest={{ prosody_community_modules_directory }} purge=yes
-  notify: restart prosody
