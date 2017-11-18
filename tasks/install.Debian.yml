@@ -7,7 +7,7 @@
   
 - name: Install Mercurial (For Prosody community modules)
   apt:
-    name: mercurial
+    name: prosody-modules
     state: present
   when: prosody_install_community_modules
 
