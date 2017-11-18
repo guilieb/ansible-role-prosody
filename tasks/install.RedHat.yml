@@ -1,37 +1,54 @@
 ---
 # tasks file for install Prosody on Fedora, CentOS and Red-Hat systems
 - name: Install EPEL (If specified and needed)
-  yum: name=epel-release state=present
+  yum:
+    name: epel-release
+    state: present
   when: prosody_install_epel and ansible_distribution == 'CentOS'
   
 - name: Install Prosody
-  yum: name=prosody state=present
+  yum:
+    name: prosody
+    state: present
   
 - name: Install Mercurial (For Prosody community modules)
-  yum: name=mercurial state=present
+  yum:
+    name: mercurial
+    state: present
   when: prosody_install_community_modules
 
 - name: Install Prosody community modules
-  hg: repo={{ prosody_community_modules_repo }} dest={{ prosody_community_modules_directory }} purge=yes
+  hg:
+    repo: "{{ prosody_community_modules_repo }}"
+    dest: "{{ prosody_community_modules_directory }}"
+    purge: yes
   when: prosody_install_community_modules
   notify: restart prosody
   
 - name: Install lua-event (If needed)
-  yum: name=lua-event state=present
+  yum:
+    name: lua-event
+    state: present
   when: prosody_install_lua_event
   notify: restart prosody
   
 - name: Install lua-zlib (If needed)
-  yum: name=lua-zlib state=present
+  yum:
+    name: lua-zlib
+    state: present
   when: prosody_install_lua_zlib
   notify: restart prosody
 
 - name: Install lua-ldap (If needed)
-  yum: name=lua-ldap state=present
+  yum:
+    name: lua-ldap
+    state: present
   when: prosody_install_lua_ldap
   notify: restart prosody
 
 - name: Install Sqlite support in Lua. Needed for Conversation XMPP Client (MAM module).
-  yum: name=lua-dbi state=present
+  yum:
+    name: lua-dbi
+    state: present
   when: prosody_enable_conversations_XEPs or prosody_storage == "sqlite"
   notify: restart prosody
