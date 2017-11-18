@@ -5,7 +5,7 @@
     name: prosody
     state: latest
   
-- name: Install Mercurial (For Prosody community modules)
+- name: Install community modules (if asked)
   apt:
     name: prosody-modules
     state: latest
