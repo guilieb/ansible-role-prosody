@@ -31,10 +31,7 @@ certificates = "/etc/prosody/certs"
 pidfile = "/run/prosody/prosody.pid";
 
 {% if "http" in prosody_modules_enabled and prosody_https_domain %}
-    https_ssl = {
-        certificate = "/etc/pki/prosody/{{ prosody_https_domain }}.crt";
-        key = "/etc/pki/prosody/{{ prosody_https_domain }}.key";
-    }
+    https_certificate = "certs/{{ prosody_https_domain }}.crt";
 {% endif %}
 
 {% if "limits" in prosody_modules_enabled and prosody_limits_c2s_rate and prosody_limits_c2s_burst and prosody_limits_s2sin_rate and prosody_limits_s2sin_burst %}

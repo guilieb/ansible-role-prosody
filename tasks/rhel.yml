@@ -3,14 +3,14 @@
 # Install prosody on RHEL/CentOS
 
 - name: Install EPEL (if specified and needed)
-  yum: name=epel-release state=latest
+  yum: name=epel-release state=present
   when: ansible_distribution == 'CentOS'
 
 - name: Install Prosody
-  yum: name=prosody state=latest
+  yum: name=prosody state=present
 
 - name: Install Mercurial (for Prosody community modules)
-  yum: name=mercurial state=latest
+  yum: name=mercurial state=present
   when: prosody_install_community_modules
 
 - name: Install Prosody community modules
@@ -18,25 +18,26 @@
     repo: "{{ prosody_community_modules_repo }}"
     dest: "{{ prosody_community_modules_directory }}"
     purge: yes
+    revision: default
   when: prosody_install_community_modules
   notify: restart prosody
 
 - name: Install lua-event (if needed)
-  yum: name=lua-event state=latest
+  yum: name=lua-event state=present
   when: prosody_install_lua_event
   notify: restart prosody
 
 - name: Install lua-zlib (if needed)
-  yum: name=lua-zlib state=latest
+  yum: name=lua-zlib state=present
   when: prosody_install_lua_zlib
   notify: restart prosody
 
 - name: Install lua-ldap (if needed)
-  yum: name=lua-ldap state=latest
+  yum: name=lua-ldap state=present
   when: prosody_install_lua_ldap
   notify: restart prosody
 
 - name: Install Sqlite support in Lua (if needed)
-  yum: name=lua-dbi state=latest
+  yum: name=lua-dbi state=present
   when: prosody_storage == "sqlite"
   notify: restart prosody

@@ -1,201 +1,197 @@
-Prosody role for Ansible
-========================
+# `ansible-role-prosody`: install prosody server
 
-Install and configure Prosody XMPP server.
+This project has been initiated by [Sébastien Gendre](mailto:s.gendre@openmailbox.org) and forked by [Guillaume Bernard](https://gitlab.com/guilieb).
 
-Features:
-- 0 Install Prosody from distribution repository.
-- 1 In option, install EPEL repository on CentOS systems.
-- 2 Install all XMPP extensions supported by [Conversations](https://conversations.im/) XMPP client.
-- 3 Allow define main settings:
-    - Admins
-    - Use libevent
-    - Modules
-    - Registration
-    - SSL
-    - c2s and s2s behavior
-    - Log files destination
-    - Etc 
-- 4 For each domains to be managed by Prosody, this role allow to push one config files to systems targeted.
-  Each config file define all settings for his own domain. See an exemple in 'files/exemple.com.cfg.lua'.
+This [Ansible](https://www.ansible.com) role aims at installing the [Prosody](https://prosody.im) [XMPP](https://xmpp.org/) server on multiple operating system (Debian and RHEL based).
+
+If includes tasks that handle:
+ 1. Prosody installation from the distribution repositories (that requires the `epel` repository on CentOS, which is installed in this role).
+ 2. The definition of many `prosody` settings, including:
+    - The server administrators.
+    - The use of `libevent`.
+    - Definition of modules.
+    - Registration.
+    - TLS.
+    - `c2s` and `s2s` behavior.
+    - Log files destination.
+    - …
+ 3. For each domain to be managed by Prosody, this role allows to push one config file to targeted systems. Each config file includes all the settings for one domain. See an exemple in `files/prosodyexemple.com.cfg.lua`.
 
 
-Requirements
-------------
+## Requirements
 
-Be root or have sudo acess.
+This roles does not depend on any other one. It requires to be **root** (or to become) in order to proceed.
 
-Distributions:
-- Fedora
-- CentOS
-- Red Hat (maybe, not tested)
-- Debian (tested on Debian 8.0)
-- Ubuntu
+It is assumed to work on the following GNU/Linux distributions:
+ - Fedora
+ - CentOS (tested on 7)
+ - Red Hat (maybe, not tested)
+ - Debian (tested on Debian 8.0)
+ - Ubuntu
 
-## Important ###
-For Red Hat and CentOS as targeted systems: Install and enable [Epel repository](https://fedoraproject.org/wiki/EPEL).
-On CentOS, this can be done by the role itself.
+## Important
 
-Actually, 'lua-zlib' are not available on Red Hat familly systems repositories. And 'lua-event' aro not available on CentOS and Red Hat distributions repositories.
+Actually, `lua-zlib` is **not available** on Red Hat familly systems repositories. And `lua-event` is **not available** on CentOS and Red Hat distributions repositories.
 
-Role Variables
---------------
+## Role Variables
 
-### Installation options ###
-- `prosody_install_epel: true` Install EPEL repository on CentOS target system only.
-- `prosody_install_community_modules: true` Install all community modules for prosody.
-   Requiered by `prosody_conversation_XEPs`. This install but don't enable comunity modules.
-- `prosody_install_lua_zlib: false` Install lua-zlib.
-- `prosody_install_lua_event: false` Install lua-event.
-- `prosody_install_lua_ldap: true` Install lua-ldap. Needed by LDAP
-  authentication module.
+### Installation options
 
-### Main options ###
-- `prosody_enable_conversations_XEPs: true` Enable (or not) all XMPP extensions supported by Conversations client.
-- `prosody_admins: []` XMPP ids considered as Prosody administrators (ex: test@exemple.com).
-- `prosody_use_libevent: false` Use luaevent (or not). (Note: Requires install lua-event).
-- `prosody_allow_registration: false` Allow new users registration publicly, from XMPP protocol.
-- `prosody_modules_enable_default: true` Enable all defaults modules. See below for the list of default modules.
-- `prosody_modules_enabled: [ … ]` List of enabled modules. Added to default list if `prosody_modules_enable_default: true`.
-- `prosody_modules_disabled: []` List of auto-loaded modules to disable. See below for the list.
+ - `prosody_install_community_modules: true`: whether to install all community modules for prosody.
+ - `prosody_install_lua_zlib: false`: whether to install `lua-zlib`.
+ - `prosody_install_lua_event: false`: whether to install `lua-even`.
+ - `prosody_install_lua_ldap: true`: whether to install `lua-ldap`. Needed by the LDAP authentication module.
 
-### SSL/TLS options ###
-- `prosody_ssl_key: "certs/localhost.key"` Main SSL key used by Prosody. Related to Prosody config directory.
-- `prosody_ssl_cert: "certs/localhost.cert"` Main SSL cert used by Prosody. Related to Prosody config directory.
+### Main options
+ - `prosody_admins: []`: Jabber IDs considered as Prosody administrators (ex: test@exemple.com).
+ - `prosody_use_libevent: false`: whether to use `luaevent`. (Note: Requires installing `lua-event`).
+ - `prosody_allow_registration: false`: whether to allow new users registration publicly, from XMPP protocol.
+ - `prosody_modules_enable_default: true`: whether to enable all defaults modules. See below for the list of default modules.
+ - `prosody_modules_enabled: […]`: the list of enabled modules. Added to default list if `prosody_modules_enable_default: true`.
+ - `prosody_modules_disabled: []`: the list of auto-loaded modules to disable. See below for the list.
 
-### Network options ###
-- `prosody_c2s_ports: []` Ports on which to listen for client connections. Empty for default ports.
-- `prosody_c2s_interfaces: []` Interfaces on which to listen for client connections. Empty for default interfaces.
-- `prosody_c2s_timeout: Null` Timeout unauthenticated client connections. Null for default timeout.
-- `prosody_s2s_ports: []` Ports on which to listen for server-to-server connections. Empty for default ports.
-- `prosody_s2s_interfaces: []` Interfaces on which to listen for server-to-server connections. Empty for default ports.
-- `prosody_s2s_timeout: Null` Timeout unauthenticated server-to-server connections. Null for default timeout.
+### SSL/TLS options
+ - `prosody_ssl_key: "certs/localhost.key"`: the main SSL key used by Prosody. Relative to Prosody the config directory.
+ - `prosody_ssl_cert: "certs/localhost.cert"`: the main SSL cert used by Prosody. Relative to Prosody the config directory.
+ - `prosody_ssl_protocol`: the [protocol](https://prosody.im/doc/advanced_ssl_config#protocol) version to support. This is **undefined** by default.
 
-### Internal auth opitons ##
-- `prosody_authentication: "internal_plain"` Backend used for user
-  authenticacion. With "pam" or "ldap" option, this role automatically
-  enable community modules needed. In this case,
-  `prosody_install_community_modules: true` is needed. For "ldap"
-  option, you need `prosody_install_lua_ldap: true` option.
-- `prosody_ldap_base: ""` LDAP base directory which stores user
-  accounts.
-- `prosody_ldap_server: "localhost"` Space-separated list of hostnames
-  or IPs, optionally with port numbers (e.g. "localhost:8389").
-- `prosody_ldap_rootdn: ""` The distinguished name to auth against.
-- `prosody_ldap_password: ""` Password for rootdn.
-- `prosody_ldap_filter: "(uid=$user)"` Search filter, with `$user` and
-  `$host` substituded for user- and hostname.
-- `prosody_ldap_scope: "subtree"` Search scope. other values: "base"
-  and "onelevel".
-- `prosody_ldap_tls: false` Enable TLS (StartTLS) to connect to LDAP
-   (can be true or false). The non-standard 'LDAPS' protocol is not
-   supported.
-- `prosody_ldap_mode: "bind"` How passwords are validated. `"bind"` or
-  `"getpasswd"`.
-- `prosody_ldap_admins: ""` Search filter to match admins, works like
-  ldap_scope.
+### Network options
+ - `prosody_c2s_ports: []`: the ports on which to listen for client connections. Leave empty for default ports.
+ - `prosody_c2s_interfaces: []`: the interfaces on which to listen for client connections. Leave empty for default interfaces.
+ - `prosody_c2s_timeout: null`: the timeout unauthenticated client connections. Leave `null` for default timeout.
+ - `prosody_s2s_ports: []`: the ports on which to listen for server-to-server connections. Leave empty for default ports.
+ - `prosody_s2s_interfaces: []`: the interfaces on which to listen for server-to-server connections. Leave empty for default ports.
+ - `prosody_s2s_timeout: null`: the timeout unauthenticated server-to-server connections.Leave `null` for default timeout.
 
-Note: You can specify these LDAP options for eachs domains managed by
-Prosody, inside the domain specific files. See ` Domains managed by
-Prosody options` subsection in options section.
+### Internal auth opitons
+ - `prosody_authentication: "internal_plain"`: the backend used for user authenticacion. With `pam` or `ldap` options, this role automatically enables the required community modules. In this case, `prosody_install_community_modules: true` is needed. For `ldap` options, you need `prosody_install_lua_ldap: true` option.
+ - `prosody_ldap_base: ""`: the LDAP base directory which stores user accounts.
+ - `prosody_ldap_server: "localhost"`: the space-separated list of hostnames or IPs, optionally with port numbers (e.g. `localhost:8389`).
+ - `prosody_ldap_rootdn: ""`: the distinguished name to auth against.
+ - `prosody_ldap_password: ""`: the `rootdn` password.
+ - `prosody_ldap_filter: "(uid=$user)"`: the search filter, with `$user` and `$host` substituded for user and hostname.
+ - `prosody_ldap_scope: "subtree"`: the search scope. other values: `base` and `onelevel`.
+ - `prosody_ldap_tls: false`: whether to enable TLS to connect to LDAP (can be `true` or `false`). The non-standard `LDAPS` protocol is not supported.
+ - `prosody_ldap_mode: "bind"`: how passwords are validated. `"bind"` or `"getpasswd"`.
+ - `prosody_ldap_admins: ""`: the search filter to match admins, works like `ldap_scope`.
 
-### Storage option ###
-- `data_path: "/var/lib/prosody"` Location of the Prosody data storage directory, without a trailing slash.
-- `prosody_storage: "sqlite"` Type of storage for prosody. For now, this role only support "sqlite" and "internal".
+**Note**: You can specify those LDAP options for each domain managed by Prosody, inside the domain specific files. See [Domains managed by Prosody options](#domains-managed-by-prosody-options) subsection in options section.
 
-### c2s and s2s behavior options###
-- `prosody_c2s_require_encryption: true` Force XMPP clients to use encrypted connections.
-- `prosody_s2s_secure_auth: false` Force certificate authentication for server-to-server connections.
-- `prosody_s2s_insecure_allowed_domains: [ "gmail.com" ]` Domains to which you allow server-to-server insecure
-   connections*.
-- `prosody_s2s_secure_required_domains: [ "jabber.org" ]` Domains to which you allow only secure server-to-server
-  connections*.
+### Storage option
+ - `prosody_data_path: "/var/lib/prosody"`: the location of the Prosody data storage directory, without any trailing slash.
+ - `prosody_storage: "internal"`: the type of storage for prosody. Up to now, this role only supports `sqlite` and `internal`.
 
-* Secure connection is when you have a valide SSL conection with validated certificate.
+### c2s and s2s behavior options
+ - `prosody_c2s_require_encryption: true`: whether to force XMPP clients to use encrypted connections.
+ - `prosody_s2s_secure_auth: false`: whether to force certificate authentication for server-to-server connections.
+ - `prosody_s2s_insecure_allowed_domains: [ ]`: the domains to which you allow server-to-server insecure connections*.
+ - `prosody_s2s_secure_required_domains: [ "jabber.org" ]`: the domains to which you allow only secure server-to-server connections*.
 
-### Log files options ###
-- `prosody_log_info_level: info` Level of informations to log.
-- `prosody_log_info_destination: "/var/log/prosody/prosody.log"` Destination, on targeted system, for info log file.
-- `prosody_log_error_destination: "/var/log/prosody/prosody.err"` Destination, on targeted system, for error log file.
+**Note**: a secure connection is when the full TLS conection is validated, with updated, signed and appropriate certificates.
 
-### Domains managed by Prosody options ###
-- `prosody_domains: []` List of domains (host) managed by Prosody.
+### Log files options
+ - `prosody_log_info_level: info`: the log level: `debug` > `info` > `warn` > `error`.
+ - `prosody_log_info_destination: "/var/log/prosody/prosody.log"`: the logfile destination on the targeted system
+ - `prosody_log_error_destination: "/var/log/prosody/prosody.err"`: the error logfile destination on the targeted system
 
-For each domain, made a config file at 'files/' folder on you working directory (next to 'roles/' folder).
-The config file must be named '<domain>.cfg.lua', where '<domain>' is your domain.
-Exemple: For 'mydomain.org', the config file name is 'mydomain.org.cfg.lua'.
+### Domains managed by Prosody options
+ - `prosody_domains: []` List of domains (host) managed by Prosody.
 
-For an exemple of domain config file, see 'files/exemple.com.cfg.lua' on role directory.
+For each domain, please write a config file in your `files/prosody`. The config file must be named `<domain>.cfg.lua`, where `<domain>` is one of the value registered in `prosody_domains`. For exemple: For `mydomain.org`, the corresponding config file is `mydomain.org.cfg.lua`.
 
-### List of official modules enabled by default ###
+For an exemple of a domain config file, see `files/prosody/exemple.com.cfg.lua` in this role directory.
 
-General required:
-- "roster": Allow users to have a roster. Recommended.
-- "saslauth": Authentication for clients and servers. Recommended for log in.
-- "tls": Add support for secure TLS on c2s/s2s connections.
-- "dialback": s2s dialback support.
-- "disco": Service discovery.
+### List of official modules enabled by default
 
-Not essential, but recommended:
-- "private": Private XML storage (for room bookmarks, etc.).
-- "vcard": Allow users to set vCards.
+This list is up-to-date according to `prosody` version `0.11.4`.
 
-Nice to have:
-- "version": Replies to server version requests.
-- "uptime": Report how long server has been running.
-- "time": Let others know the time here on this server.
-- "ping": Replies to XMPP pings with pongs.
-- "pep": Enables users to publish their mood, activity, playing music and more.
-- "register": Allow users to register on this server using a client and change passwords.
+* General required:
+  - `roster`: Allow users to have a roster. Recommended.
+  - `saslauth`: Authentication for clients and servers. Recommended if you want to log in.
+  - `tls`: Add support for secure TLS on c2s/s2s connections.
+  - `dialback`: s2s dialback support.
+  - `disco`: Service discovery.
 
-Admin interfaces:
-- "admin_adhoc": Allows administration via an XMPP client that supports ad-hoc commands.
+* Not essential, but recommended:
+  - `carbons`: Keep multiple clients in sync
+  - `pep`: Enables users to publish their avatar, mood, activity, playing music and more
+  - `private`: Private XML storage (for room bookmarks, etc.).
+  - `blocklist`: Allow users to block communications with other users
+  - `vcard4`: User profiles (stored in PEP)
+  - `vcard_legacy`: Conversion between legacy vCard and PEP Avatar, vcard
 
-Other specific functionality:
-- "posix": POSIX functionality, sends server to background, enables syslog, etc.
+* Nice to have:
+  - `version`: Replies to server version requests
+  - `uptime`: Report how long server has been running.
+  - `time`: Let others know the time here on this server
+  - `ping`: Replies to XMPP pings with pongs
+  - `register`: Allow users to register on this server using a client and change passwords
 
-### List of official modules not enabled by default ###
+* Admin interfaces:
+  - `admin_adhoc`: Allows administration via an XMPP client that supports ad-hoc commands
 
-Performance and privacy:
-- "privacy": Support privacy lists
-- "compression": Stream compression (Note: Requires installed lua-zlib).
+### List of official modules not enabled by default
 
-Admin interfaces:
-- "admin_telnet": Opens telnet console interface on localhost port 5582.
+This list is up-to-date according to `prosody` version `0.11.4`.
 
-HTTP modules:
-- "bosh": Enable BOSH clients, aka "Jabber over HTTP".
-- "http_files": Serve static files from a directory over HTTP.
+* Nice to have:
+  - `mam`: Store messages in an archive and allow users to access it
+  - `csi_simple`: Simple Mobile optimizations
 
-Other specific functionality:
-- "groups": Shared roster support.
-- "announce": Send announcement to all online users.
-- "welcome": Welcome users who register accounts.
-- "watchregistrations": Alert admins of registrations.
-- "motd": Send a message to users when they log in.
-- "legacyauth": Legacy authentication. Only used by some old clients and bots.
+* Admin interfaces:
+  - `admin_telnet`: Opens telnet console interface on localhost port 5582.
 
-### List of auto-loaded modules ###
-- "offline": Store offline messages
-- "c2s": Handle client connections
-- "s2s": Handle server-to-server connections
+* HTTP modules:
+  - `bosh`: Enable BOSH clients, aka “Jabber over HTTP”
+  - `websocket`: XMPP over WebSockets
+  - `http_files`: Serve static files from a directory over HTTP
 
-### List of community module supported by Conversations ###
+* Other specific functionality:
+  - `limits`: Enable bandwidth limiting for XMPP connections
+  - `groups`: Shared roster support.
+  - `server_contact_info`: Publish contact information for this service
+  - `announce`: Send announcement to all online users
+  - `welcome`: Welcome users who register accounts
+  - `watchregistrations`: Alert admins of registrations
+  - `motd`: Send a message to users when they log in
+  - `legacyauth`: Legacy authentication. Only used by some old clients and bots
+  - `proxy65`: Enables a file transfer proxy service which clients behind NAT can use
 
-- "mod_carbons":  [Message Carbons](http://modules.prosody.im/mod_carbons.html)
-                  [XEP-0280](https://xmpp.org/extensions/xep-0280.html)
-- "mod_smacks":   [Stream Management](http://modules.prosody.im/mod_smacks.html)
-                  [XEP-0198](https://xmpp.org/extensions/xep-0198.html)
-- "mod_blocking": [Blocking Command](http://modules.prosody.im/mod_blocking.html)
-                  [XEP-0191](https://xmpp.org/extensions/xep-0191.html)
-- "mod_csi":      [Client State Indication](http://modules.prosody.im/mod_csi.html)
-                  [XEP-0352](https://xmpp.org/extensions/xep-0352.html)
-- "mod_mam":      [Message Archive Management](http://modules.prosody.im/mod_mam.html)
-                  [XEP-0313](https://xmpp.org/extensions/xep-0313.html)
+### List of auto-loaded modules
+
+ - `offline`: Store offline messages
+ - `c2s`: Handle client connections
+ - `s2s`: Handle server-to-server connections
+ - `posix`: POSIX functionality, sends server to background, enables syslog, etc.
+
+### Modules options
+
+This options are used if the corresponding module is enabled in `prosody_modules_default`.
+
+#### `mod_limits`
+
+See [`mod_limits`](https://prosody.im/doc/modules/mod_limits) for more information.
+
+ - `prosody_limits_c2s_rate: "3kb/s"`: client to server rate
+ - `prosody_limits_c2s_burst: "2s"`: client to server burst
+ - `prosody_limits_s2sin_rate: "30kb/s"`: server to server (incoming) rate
+ - `prosody_limits_s2sin_burst: "3s"`: server to server (incomming) burst
+
+#### `mod_http`
+
+See [`mod_http`](https://prosody.im/doc/modules/mod_http) for more information.
+
+ - `prosody_https_domain: ""`: the default domain, which has a TLS certificate and that will distribute files. This sets the `https_certificate` option with `prosody_https_domain` as the component of the keyname. This is **undefined** by default.
 
 
-Example Playbook
-----------------
+#### `mod_mam`
+
+See [`mod_mam`](https://prosody.im/doc/modules/mod_mam) for more information.
+
+ - `prosody_mam_archive_expires_after: '"4w"'`: Messages in the archive will expire after some time, here 4 weeks, by default.
+
+## Example Playbook
+
 
 ```yaml
 - hosts: xmpp-servers
@@ -207,26 +203,4 @@ Example Playbook
   roles:
     - prosody
 ```
-
-TODO
-----
-
-- Finish te add and test PAM auth support
-- Add mysql and PgSql as storage option, needed by mam, so needed for conversation client
-- Add pubsub support
-- Add ability to push "more options" config file
-- Add ability to push module config file
-- Add ability to Anisible user to install their own Prosody module.
-- Add ability to Anisible user to install their own Prosody module repository.
-- Add ability to Anisible user to provide their own template for Prosody main config file.
-
-License
--------
-
-GPL-V3
-
-
-Author Information
-------------------
-Sébastien Gendre: s.gendre@openmailbox.org
 

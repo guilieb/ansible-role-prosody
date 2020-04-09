@@ -14,12 +14,6 @@
     prosody_modules_enabled: "{{ prosody_modules_default + prosody_modules_enabled }}"
   when: prosody_modules_enable_default
 
-# Enable conversation XEPs
-- name: Add modules, for Conversations client XEPs, inside enabled modules list
-  set_fact:
-    prosody_modules_enabled: "{{ prosody_modules_enabled + prosody_modules_conversations }}"
-  when: prosody_enable_conversations_XEPs
-
 # Enable LDAP Prosody module
 - name: Add module "ldap", if needed, inside enabled modules list
   set_fact:

@@ -4,6 +4,7 @@ galaxy_info:
   company:
   issue_tracker_url: https://gitlab.com/guilieb/ansible-role-prosody/-/issues
   license: GPLv3
+  role_name: "prosody"
 
   min_ansible_version: 2.0
 
@@ -11,19 +12,26 @@ galaxy_info:
   - name: EL
     versions:
     - 7
+    - 8
   - name: Fedora
     versions:
-    - all
+    - 32
+    - 31
+    - 30
   - name: Ubuntu
     versions:
-    - all
+    - xenial
+    - bionic
+    - eoan
   - name: Debian
     versions:
-    - jessie
-    - lenny
+    - buster
+    - stretch
 
   galaxy_tags:
     - prosody
     - xmpp
+    - jabber
+    - networking
 
 dependencies: []
