@@ -2,14 +2,18 @@
 # Main tasks file for prosody role
 
 # Install prosody
-- include_tasks: install.{{ ansible_os_family }}.yml
+- include_tasks: debian.yml
+  when: ansible_facts['os_family'] == "Debian"
+
+- include_tasks: rhel.yml
+  when: ansible_facts['os_family'] == "RedHat"
 
 # Enable default modules
 - name: Add default modules, if needed, inside enabled modules list
   set_fact:
     prosody_modules_enabled: "{{ prosody_modules_default + prosody_modules_enabled }}"
   when: prosody_modules_enable_default
-  
+
 # Enable conversation XEPs
 - name: Add modules, for Conversations client XEPs, inside enabled modules list
   set_fact:
@@ -27,7 +31,7 @@
   set_fact:
     prosody_modules_enabled: "{{ prosody_modules_enabled + prosody_modules_auth_pam }}"
   when: prosody_authentication == "pam"
-  
+
 # Push configuration files
 - name: Copy main config file
   template:
@@ -35,19 +39,28 @@
     dest: /etc/prosody/prosody.cfg.lua
     owner: root
     group: prosody
-    mode: 0640 # u:rw, g:r and o:-
+    mode: 0640
     backup: yes
-    
+    validate: 'luac -p %s'
+
   notify: restart prosody
 
 - name: Copy domains (hosts) config files
   copy:
-    src: "files/{{ item }}.cfg.lua"
+    src: "files/prosody/{{ item }}.cfg.lua"
     dest: "/etc/prosody/conf.d/{{ item }}.cfg.lua"
     owner: root
     group: prosody
-    mode: 0640 # u:rw, g:r and o:-
+    mode: 0640
     backup: yes
     validate: 'luac -p %s'
-  with_items: "{{prosody_domains}}"
+  with_items: "{{ prosody_domains }}"
+
   notify: restart prosody
+
+# Register accounts (if user already exists, password will be overwritten
+- name: "Register user accounts"
+  command: prosodyctl register {{ item.value.user }} {{ item.value.host }} {{ item.value.passwd }}
+  loop: "{{ prosody_users_to_register | dict2items }}"
+  when: "prosody_users_to_register is defined"
+  no_log: True

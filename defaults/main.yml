@@ -1,15 +1,15 @@
 ---
 # Main defaults file for prosody
 
-# Installation options 
-prosody_install_epel: true
-prosody_install_community_modules: true 
-prosody_install_lua_zlib: false 
+# Installation options
+
+prosody_install_community_modules: true
+prosody_install_lua_zlib: false
 prosody_install_lua_event: false
-prosody_install_lua_ldap: true
+prosody_install_lua_ldap: false
 prosody_stop_at_the_end: false
 
-# Main options 
+# Main options
 prosody_enable_conversations_XEPs: true
 prosody_modules_conversations:
   - "carbons"
@@ -26,25 +26,32 @@ prosody_modules_enabled: []
 prosody_modules_enable_default: true
 prosody_modules_default:
   - "roster"
-  - "saslauth" 
-  - "tls" 
-  - "dialback" 
-  - "disco" 
-  - "private" 
-  - "vcard" 
-  - "version" 
-  - "uptime" 
-  - "time" 
-  - "ping" 
-  - "pep" 
-  - "register" 
-  - "admin_adhoc" 
+  - "saslauth"
+  - "tls"
+  - "dialback"
+  - "disco"
+  - "carbons"
+  - "pep"
+  - "private"
+  - "blocklist"
+  - "vcard4"
+  - "vcard_legacy"
+  - "version"
+  - "uptime"
+  - "time"
+  - "ping"
+  - "register"
+  - "mam"
+  - "csi_simple"
+  - "admin_adhoc"
   - "posix"
+  - "http"
+  - "limits"
+  - "announce"
+  - "welcome"
+  - "watchregistrations"
+  - "motd"
 prosody_modules_disabled: []
-  
-# SSL/TLS options 
-prosody_ssl_key: "certs/localhost.key" 
-prosody_ssl_cert: "certs/localhost.cert"
 
 # Network options
 prosody_c2s_ports: []
@@ -68,19 +75,34 @@ prosody_ldap_admins: ""
 
 # Storage option
 prosody_data_path: "/var/lib/prosody"
-prosody_storage: "sqlite"
+prosody_storage: "internal"
 
 # c2s and s2s behavior options
 prosody_c2s_require_encryption: true
 prosody_s2s_secure_auth: false
-prosody_s2s_insecure_allowed_domains: [ "gmail.com" ]
+prosody_s2s_insecure_allowed_domains: [ ]
 prosody_s2s_secure_required_domains: [ "jabber.org" ]
 
+# mod_limits
+prosody_limits_c2s_rate: "3kb/s"
+prosody_limits_c2s_burst: "2s"
+prosody_limits_s2sin_rate: "30kb/s"
+prosody_limits_s2sin_burst: "3s"
+
+# mod_http
+prosody_https_domain: ""
+
+# mod_tls
+prosody_ssl_protocol: ""
+
+# mod_mam
+prosody_mam_archive_expires_after: '"4w"'
 
 # Log files options
 prosody_log_info_level: "info"
 prosody_log_info_destination: "/var/log/prosody/prosody.log"
 prosody_log_error_destination: "/var/log/prosody/prosody.err"
 
-# Domains managed by Prosody options 
+# Domains managed by Prosody options
 prosody_domains: []
+

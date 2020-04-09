@@ -1,182 +1,132 @@
 -- {{ ansible_managed }}
--- Prosody Configuration File
---
--- Information on configuring Prosody can be found on our
--- website at http://prosody.im/doc/configure
---
--- Tip: You can check that the syntax of this file is correct
--- when you have finished by running: luac -p prosody.cfg.lua
--- If there are any errors, it will let you know what and where
--- they are, otherwise it will keep quiet.
---
--- The only thing left to do is rename this file to remove the .dist ending, and fill in the
--- blanks. Good luck, and happy Jabbering!
 
-
----------- Server-wide settings ----------
--- Settings in this section apply to the whole server and are the default settings
--- for any virtual hosts
-
--- This is a (by default, empty) list of accounts that are admins
--- for the server. Note that you must create the accounts separately
--- (see http://prosody.im/doc/creating_accounts for info)
--- Example: admins = { "user1@example.com", "user2@example.net" }
 {% if prosody_admins %}
-admins = { "{{ prosody_admins|join('", "') }}" }
+    admins = { "{{ prosody_admins|join('", "') }}" }
 {% else %}
-admins = {  }
+    admins = {  }
 {% endif %}
 
--- Enable use of libevent for better performance under high load
--- For more information see: http://prosody.im/doc/libevent
-use_libevent = {{ "true" if prosody_use_libevent else "false" }};
+use_libevent = {{ prosody_use_libevent |bool | lower }};
 
 {% if prosody_install_community_modules and ansible_os_family == 'RedHat' %}
--- Additional modules
-plugin_paths = { "{{ prosody_community_modules_directory }}" }
+    plugin_paths = { "{{ prosody_community_modules_directory }}" }
 {% endif %}
 
--- This is the list of modules Prosody will load on startup.
--- It looks for mod_modulename.lua in the plugins folder, so make sure that exists too.
--- Documentation on modules can be found at: http://prosody.im/doc/modules
 modules_enabled = {
 {% for module in prosody_modules_enabled %}
-        "{{ module }}";
+    "{{ module }}";
 {% endfor %}
 };
 
--- These modules are auto-loaded, but should you want
--- to disable them then uncomment them here:
 modules_disabled = {
 {% for module in prosody_modules_disabled %}
-        "{{ module }}";
+    "{{ module }}";
 {% endfor %}
 };
 
--- Disable account creation by default, for security
--- For more information see http://prosody.im/doc/creating_accounts
-allow_registration = {{ "true" if prosody_allow_registration else "false" }};
+allow_registration = {{ prosody_allow_registration | bool | lower }};
 
--- These are the SSL/TLS-related settings. If you don't want
--- to use SSL/TLS, you may comment or remove this
-ssl = {
-	key = "{{ prosody_ssl_key }}";
-	certificate = "{{ prosody_ssl_cert }}";
-}
+certificates = "/etc/prosody/certs"
 
--- Force clients to use encrypted connections? This option will
--- prevent clients from authenticating unless they are using encryption.
+pidfile = "/run/prosody/prosody.pid";
 
-c2s_require_encryption = {{ "true" if prosody_c2s_require_encryption else "false" }}
-
--- Force certificate authentication for server-to-server connections?
--- This provides ideal security, but requires servers you communicate
--- with to support encryption AND present valid, trusted certificates.
--- NOTE: Your version of LuaSec must support certificate verification!
--- For more information see http://prosody.im/doc/s2s#security
-
-s2s_secure_auth = {{ "true" if prosody_s2s_secure_auth else "false" }}
-
--- Many servers don't support encryption or have invalid or self-signed
--- certificates. You can list domains here that will not be required to
--- authenticate using certificates. They will be authenticated using DNS.
-
-{% if prosody_s2s_insecure_allowed_domains %}
-s2s_insecure_domains = { "{{ prosody_s2s_insecure_allowed_domains|join('", "') }}" }
-{% else %}
--- s2s_insecure_domains = { "gmail.com" }
+{% if "http" in prosody_modules_enabled and prosody_https_domain %}
+    https_ssl = {
+        certificate = "/etc/pki/prosody/{{ prosody_https_domain }}.crt";
+        key = "/etc/pki/prosody/{{ prosody_https_domain }}.key";
+    }
 {% endif %}
 
--- Even if you leave s2s_secure_auth disabled, you can still require valid
--- certificates for some domains by specifying a list here.
+{% if "limits" in prosody_modules_enabled and prosody_limits_c2s_rate and prosody_limits_c2s_burst and prosody_limits_s2sin_rate and prosody_limits_s2sin_burst %}
+    limits = {
+        c2s = {
+            rate = "{{ prosody_limits_c2s_rate }}";
+            burst = "{{ prosody_limits_c2s_burst }}";
+        };
+        s2sin = {
+            rate = "{{ prosody_limits_s2sin_rate }}";
+            burst = "{{ prosody_limits_s2sin_burst }}";
+        };
+}
+{% endif %}
+
+{% if "mam" in prosody_modules_enabled %}
+    archive_expires_after = {{ prosody_mam_archive_expires_after }};
+{% endif %}
+
+ssl = {
+    {% if prosody_ssl_protocol is defined %}
+        protocol = "{{ prosody_ssl_protocol }}"
+    {% endif %}
+}
+
+c2s_require_encryption = {{ "true" if prosody_c2s_require_encryption else "false" }}
+s2s_secure_auth = {{ "true" if prosody_s2s_secure_auth else "false" }}
+
+{% if prosody_s2s_insecure_allowed_domains %}
+    s2s_insecure_domains = { "{{ prosody_s2s_insecure_allowed_domains|join('", "') }}" }
+{% else %}
+    -- s2s_insecure_domains = { "gmail.com" }
+{% endif %}
 
 {% if prosody_s2s_secure_required_domains %}
-s2s_secure_domains = { "{{ prosody_s2s_secure_required_domains|join('", "') }}" }
+    s2s_secure_domains = { "{{ prosody_s2s_secure_required_domains|join('", "') }}" }
 {% else %}
 --s2s_secure_domains = { "jabber.org" }
 {% endif %}
 
 {% if prosody_c2s_ports %}
-c2s_ports = { "{{ prosody_c2s_ports|join('", "') }}" }
-{% endif %}
-{% if prosody_c2s_interfaces %}
-c2s_interfaces = { "{{ prosody_c2s_interfaces|join('", "') }}" }
-{% endif %}
-{% if prosody_c2s_timeout %}
-c2s_timeout = {{ prosody_c2s_timeout }};
-{% endif %}
-{% if prosody_s2s_ports %}
-s2s_ports = { "{{ prosody_s2s_ports|join('", "') }}" }
-{% endif %}
-{% if prosody_s2s_interfaces %}
-s2s_interfaces = { "{{ prosody_s2s_interfaces|join('", "') }}" }
-{% endif %}
-{% if prosody_s2s_timeout %}
-s2s_timeout =  {{ prosody_s2s_timeout}};
-{% endif %}
-{% if prosody_data_path != "/var/lib/prosody" %}
-data_path = "{{ prosody_data_path }}";
+    c2s_ports = { "{{ prosody_c2s_ports|join('", "') }}" }
 {% endif %}
 
--- Select the authentication backend to use. The 'internal' providers
--- use Prosody's configured data storage to store the authentication data.
--- To allow Prosody to offer secure authentication mechanisms to clients, the
--- default provider stores passwords in plaintext. If you do not trust your
--- server please see http://prosody.im/doc/modules/mod_auth_internal_hashed
--- for information about using the hashed backend.
+{% if prosody_c2s_interfaces %}
+    c2s_interfaces = { "{{ prosody_c2s_interfaces|join('", "') }}" }
+{% endif %}
+
+{% if prosody_c2s_timeout %}
+    c2s_timeout = {{ prosody_c2s_timeout }};
+{% endif %}
+
+{% if prosody_s2s_ports %}
+    s2s_ports = { "{{ prosody_s2s_ports|join('", "') }}" }
+{% endif %}
+
+{% if prosody_s2s_interfaces %}
+    s2s_interfaces = { "{{ prosody_s2s_interfaces|join('", "') }}" }
+{% endif %}
+
+{% if prosody_s2s_timeout %}
+    s2s_timeout =  {{ prosody_s2s_timeout}};
+{% endif %}
+
+{% if prosody_data_path != "/var/lib/prosody" %}
+    data_path = "{{ prosody_data_path }}";
+{% endif %}
 
 authentication = "{{ prosody_authentication }}"
 
 {% if prosody_authentication == "ldap" %}
-
-prosody_ldap_base = "{{ prosody_ldap_base }}"
-prosody_ldap_server = "{{ prosody_ldap_server }}"
-prosody_ldap_rootdn = "{{ prosody_ldap_rootdn }}"
-prosody_ldap_password = "{{ prosody_ldap_password }}"
-prosody_ldap_filter = "{{ prosody_ldap_filter }}"
-prosody_ldap_scope = "{{ prosody_ldap_scope }}"
-prosody_ldap_tls = "{{ prosody_ldap_tls }}"
-prosody_ldap_mode = "{{ prosody_ldap_mode }}"
-prosody_ldap_admins = "{{ prosody_ldap_admins }}"
-
+    prosody_ldap_base = "{{ prosody_ldap_base }}"
+    prosody_ldap_server = "{{ prosody_ldap_server }}"
+    prosody_ldap_rootdn = "{{ prosody_ldap_rootdn }}"
+    prosody_ldap_password = "{{ prosody_ldap_password }}"
+    prosody_ldap_filter = "{{ prosody_ldap_filter }}"
+    prosody_ldap_scope = "{{ prosody_ldap_scope }}"
+    prosody_ldap_tls = "{{ prosody_ldap_tls }}"
+    prosody_ldap_mode = "{{ prosody_ldap_mode }}"
+    prosody_ldap_admins = "{{ prosody_ldap_admins }}"
 {% endif %}
-
--- Select the storage backend to use. By default Prosody uses flat files
--- in its configured data directory, but it also supports more backends
--- through modules. An "sql" backend is included by default, but requires
--- additional dependencies. See http://prosody.im/doc/storage for more info.
 
 {% if prosody_storage == "internal" %}
---storage = "sql" -- Default is "internal" (Note: "sql" requires installed
--- lua-dbi RPM package)
-
--- For the "sql" backend, you can uncomment *one* of the below to configure:
---sql = { driver = "SQLite3", database = "prosody.sqlite" } -- Default. 'database' is the filename.
---sql = { driver = "MySQL", database = "prosody", username = "prosody", password = "secret", host = "localhost" }
---sql = { driver = "PostgreSQL", database = "prosody", username = "prosody", password = "secret", host = "localhost" }
-{%elif prosody_storage == "sqlite"%}
-storage = "sql"
-sql = { driver = "SQLite3", database = "prosody.sqlite" }
+    storage = "internal"
+{% elif prosody_storage == "sqlite" %}
+    storage = "sql"
+    sql = { driver = "SQLite3", database = "prosody.sqlite" }
 {% endif %}
 
--- Logging configuration
--- For advanced logging see http://prosody.im/doc/logging
 log = {
-	-- Log everything of level "info" and higher (that is, all except "debug" messages)
-	-- to /var/log/prosody/prosody.log and errors also to /var/log/prosody/prosody.err
-	{{ prosody_log_info_level }} = "{{ prosody_log_info_destination }}"; -- Change 'info' to 'debug' for verbose logging
-	error = "{{ prosody_log_error_destination }}"; -- Log errors also to file
-	-- error = "*syslog"; -- Log errors also to syslog
-	-- log = "*console"; -- Log to the console, useful for debugging with daemonize=false
+    {{ prosody_log_info_level }} = "{{ prosody_log_info_destination }}";
+    error = "{{ prosody_log_error_destination }}";
 }
-
--- POSIX configuration, see also http://prosody.im/doc/modules/mod_posix
-pidfile = "/run/prosody/prosody.pid";
---daemonize = false -- Default is "true"
-
------- Additional config files ------
--- For organizational purposes you may prefer to add VirtualHost and
--- Component definitions in their own config files. This line includes
--- all config files in /etc/prosody/conf.d/
 
 Include "conf.d/*.cfg.lua"

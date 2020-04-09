@@ -1,0 +1,30 @@
+
+---
+# Install prosody on Debian
+
+- name: Install Prosody
+  apt: name=prosody state=latest
+
+- name: Install community modules (if asked)
+  apt: name=prosody-modules state=latest
+  when: prosody_install_community_modules
+
+- name: Install lua-event (if needed)
+  apt: name=lua-event state=latest
+  when: prosody_install_lua_event
+  notify: restart prosody
+
+- name: Install lua-zlib (if needed)
+  apt: name=lua-zlib state=latest
+  when: prosody_install_lua_zlib
+  notify: restart prosody
+
+- name: Install lua-ldap (if needed)
+  apt: name=lua-ldap state=latest
+  when: prosody_install_lua_ldap
+  notify: restart prosody
+
+- name: Install Sqlite support in Lua (if needed)
+  apt: name=lua-dbi-sqlite3 state=latest
+  when: prosody_storage == "sqlite"
+  notify: restart prosody
