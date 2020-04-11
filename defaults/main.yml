@@ -12,7 +12,6 @@ prosody_modules_auth_ldap: ["auth_ldap"]
 prosody_modules_auth_pam: ["auth_pam"]
 prosody_admins: []
 prosody_use_libevent: false
-prosody_allow_registration: false
 prosody_modules_enabled: []
 prosody_modules_enable_default: true
 prosody_modules_default:
@@ -44,17 +43,20 @@ prosody_s2s_ports: []
 prosody_s2s_interfaces: []
 prosody_s2s_timeout: null
 
-# Internal main auth opitons
 prosody_authentication: "internal_plain"
-prosody_ldap_base: ""
-prosody_ldap_server: "localhost"
-prosody_ldap_rootdn: ""
-prosody_ldap_password: ""
-prosody_ldap_filter: "(uid=$user)"
-prosody_ldap_scope: "subtree"
-prosody_ldap_tls: false
-prosody_ldap_mode: "bind"
-prosody_ldap_admins: ""
+
+# Internal main auth opitons
+prosody_ldap:
+  authentication: "internal_plain"
+  base: ""
+  server: "localhost"
+  rootdn: ""
+  password: ""
+  filter: "(uid=$user)"
+  scope: "subtree"
+  tls: false
+  mode: "bind"
+  admins: ""
 
 # Storage option
 prosody_data_path: "/var/lib/prosody"
@@ -67,18 +69,30 @@ prosody_s2s_insecure_allowed_domains: [ ]
 prosody_s2s_secure_required_domains: [ "jabber.org" ]
 
 # Log files options
-prosody_log_info_level: "info"
-prosody_log_info_destination: "/var/log/prosody/prosody.log"
-prosody_log_error_destination: "/var/log/prosody/prosody.err"
+prosody_log:
+  info_level: "info"
+  info_dst: "/var/log/prosody/prosody.log"
+  error_dst: "/var/log/prosody/prosody.err"
 
 # Domains managed by Prosody options
 prosody_domains: []
 
 # mod_limits
-prosody_limits_c2s_rate: "3kb/s"
-prosody_limits_c2s_burst: "2s"
-prosody_limits_s2sin_rate: "30kb/s"
-prosody_limits_s2sin_burst: "3s"
+prosody_limits:
+  c2s:
+    rate: "3kb/s"
+    burst: "2s"
+  s2sin:
+    rate: "30kb/s"
+    burst: "3s"
 
 # mod_mam
-prosody_mam_archive_expires_after: '"4w"'
+prosody_mam:
+  archive_expires_after: '"4w"'
+
+# mod_register
+prosody_register:
+  allow_registration: false
+  min_seconds_between_registrations: 30
+  throttle_max: 3
+  throttle_period: 60

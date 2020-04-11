@@ -24,31 +24,42 @@ modules_disabled = {
 {% endfor %}
 };
 
-allow_registration = {{ prosody_allow_registration | bool | lower }};
+allow_registration = {{ prosody_register.allow_registration | bool | lower }};
+min_seconds_between_registrations = {{ prosody_register.min_seconds_between_registrations }};
+registration_throttle_max = {{ prosody_register.throttle_max }};
+registration_throttle_period =  {{ prosody_register.throttle_period }};
 
 certificates = "/etc/prosody/certs"
 
 pidfile = "/run/prosody/prosody.pid";
 
-{% if "http" in prosody_modules_enabled and prosody_https_domain %}
+{% if prosody_http_host is defined %}
+    http_host = "{{ prosody_http_host }}";
+{% endif %}
+
+{% if prosody_trusted_proxies is defined and prosody_trusted_proxies | length > 0 %}
+   trusted_proxies = { {{ prosody_trusted_proxies }} };
+{% endif %}
+
+{% if prosody_https_domain is defined %}
     https_certificate = "certs/{{ prosody_https_domain }}.crt";
 {% endif %}
 
-{% if "limits" in prosody_modules_enabled and prosody_limits_c2s_rate and prosody_limits_c2s_burst and prosody_limits_s2sin_rate and prosody_limits_s2sin_burst %}
+{% if "limits" in prosody_modules_enabled and prosody_limits is defined %}
     limits = {
         c2s = {
-            rate = "{{ prosody_limits_c2s_rate }}";
-            burst = "{{ prosody_limits_c2s_burst }}";
+            rate = "{{ prosody_limits.c2s.rate }}";
+            burst = "{{ prosody_limits.c2s.burst }}";
         };
         s2sin = {
-            rate = "{{ prosody_limits_s2sin_rate }}";
-            burst = "{{ prosody_limits_s2sin_burst }}";
+            rate = "{{ prosody_limits.s2sin.rate }}";
+            burst = "{{ prosody_limits.s2sin.burst }}";
         };
 }
 {% endif %}
 
 {% if "mam" in prosody_modules_enabled %}
-    archive_expires_after = {{ prosody_mam_archive_expires_after }};
+    archive_expires_after = {{ prosody_mam.archive_expires_after }};
 {% endif %}
 
 ssl = {
@@ -103,15 +114,15 @@ s2s_secure_auth = {{ "true" if prosody_s2s_secure_auth else "false" }}
 authentication = "{{ prosody_authentication }}"
 
 {% if prosody_authentication == "ldap" %}
-    prosody_ldap_base = "{{ prosody_ldap_base }}"
-    prosody_ldap_server = "{{ prosody_ldap_server }}"
-    prosody_ldap_rootdn = "{{ prosody_ldap_rootdn }}"
-    prosody_ldap_password = "{{ prosody_ldap_password }}"
-    prosody_ldap_filter = "{{ prosody_ldap_filter }}"
-    prosody_ldap_scope = "{{ prosody_ldap_scope }}"
-    prosody_ldap_tls = "{{ prosody_ldap_tls }}"
-    prosody_ldap_mode = "{{ prosody_ldap_mode }}"
-    prosody_ldap_admins = "{{ prosody_ldap_admins }}"
+    prosody_ldap_base = "{{ prosody_ldap.base }}"
+    prosody_ldap_server = "{{ prosody_ldap.server }}"
+    prosody_ldap_rootdn = "{{ prosody_ldap.rootdn }}"
+    prosody_ldap_password = "{{ prosody_ldap.password }}"
+    prosody_ldap_filter = "{{ prosody_ldap.filter }}"
+    prosody_ldap_scope = "{{ prosody_ldap.scope }}"
+    prosody_ldap_tls = "{{ prosody_ldap.tls }}"
+    prosody_ldap_mode = "{{ prosody_ldap.mode }}"
+    prosody_ldap_admins = "{{ prosody_ldap.admins }}"
 {% endif %}
 
 {% if prosody_storage == "internal" %}
@@ -122,8 +133,8 @@ authentication = "{{ prosody_authentication }}"
 {% endif %}
 
 log = {
-    {{ prosody_log_info_level }} = "{{ prosody_log_info_destination }}";
-    error = "{{ prosody_log_error_destination }}";
+    {{ prosody_log.info_level }} = "{{ prosody_log.info_dst }}";
+    error = "{{ prosody_log.error_dst }}";
 }
 
 Include "conf.d/*.cfg.lua"
